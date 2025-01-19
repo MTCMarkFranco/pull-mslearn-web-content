@@ -1,0 +1,6 @@
+beautifulsoup4
+requests
+fpdf
+azure-cognitiveservices-vision-computervision
+azure-ai-vision-imageanalysis
+python-dotenv
