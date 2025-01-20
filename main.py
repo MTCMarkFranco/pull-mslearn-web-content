@@ -20,13 +20,13 @@ for idx, content in enumerate(scraper.webContentList):
     try:
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.set_auto_page_break(auto=False, margin=15)
         pdf.add_font('ArialUnicode', '', 'ArialUnicodeMS.ttf', uni=True)
         pdf.set_font("ArialUnicode", size=12)
         
         # Add URL and Type to the first page
-        pdf.multi_cell(0, 10, f"URL: {content.url}")
-        pdf.multi_cell(0, 10, f"Type of Link: {content.Type}")
+        pdf.multi_cell(0, 12, f"URL: {content.url}")
+        pdf.multi_cell(0, 12, f"Type of Link: {content.Type}")
         pdf.ln(10)  # Add a line break
         
         pdf.multi_cell(0, 12, content.content)

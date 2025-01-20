@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from imageAnalysisClient  import imageAnalysisClient
+from utilities import utilities
 from models.webContent import webContent
 
 class linkScraper:
@@ -30,9 +31,17 @@ class linkScraper:
         # If we have an image just process the image using computer vision and
         # obviously no search for child links
         currentWebContent.url = url
-                
-        if any(ext in response.headers['Content-Type'] for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff']):
-            image_description = self.image_client.describe_image(url) 
+        
+        # convert SVG to Jpeg (Microsoft architecture articles are riddled with SVGs)
+        content_type = response.headers['Content-Type']
+
+        if content_type.startswith("image/svg"):
+            svg_image = utilities.convert_svg_to_png(url)
+            image_description = self.image_client.describe_image_from_stream(url, svg_image)
+            currentWebContent.content = image_description
+            currentWebContent.Type = 'IMAGE'
+        elif any(ext in content_type for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff']):
+            image_description = self.image_client.describe_image(url)
             currentWebContent.content = image_description
             currentWebContent.Type = 'IMAGE'
         else:

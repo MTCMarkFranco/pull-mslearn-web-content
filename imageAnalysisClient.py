@@ -35,3 +35,37 @@ class imageAnalysisClient:
         word_list = ", ".join(words)
         print(f"Converted image from url to text: {image_url}")
         return word_list
+
+    def describe_image_from_stream(self, original_svg_url, image_stream: str) -> str:
+               
+
+        # Create an Image Analysis client
+        client = AzureImageAnalysisClient(
+            endpoint=self.endpoint,
+            credential=AzureKeyCredential(self.key)
+        )
+
+        # Get a caption for the image. This will be a synchronously (blocking) call.
+        result = client._analyze_from_image_data(
+            image_data=image_stream,
+            visual_features=[VisualFeatures.DENSE_CAPTIONS,
+                             VisualFeatures.READ,
+                             VisualFeatures.OBJECTS,
+                             VisualFeatures.TAGS],
+                             
+            gender_neutral_caption=True,  # Optional (default is False)
+        )
+
+        # Extract words from OCR results and create a comma-separated list
+        words = []
+        if result.read is not None:
+            for block in result.read.blocks:
+                for line in block.lines:
+                    for word in line.words:
+                        words.append(word.text)
+
+        word_list = ", ".join(words)
+        print(f"Converted SVG image from url to text: {original_svg_url}")
+        return word_list
+        
+    
