@@ -5,11 +5,12 @@ from imageAnalysisClient import imageAnalysisClient
 from utilities import utilities
 from models.webContent import webContent
 from deriveArticleCategory import deriveArticleCategory
+from writeToIndex import writeToIndex
 
 class linkScraper:
     def __init__(self,endpoint, key):
         self.visited = set()
-        self.webContentList = []
+        #self.webContentList = []
         self.image_client = imageAnalysisClient(endpoint=endpoint, key=key)
      
 
@@ -56,4 +57,5 @@ class linkScraper:
             #         print(full_url)
             #         self.get_all_links(full_url)
         
-        self.webContentList.append(currentWebContent)
+        writeToIndex().write_to_index(currentWebContent)
+        #self.webContentList.append(currentWebContent)

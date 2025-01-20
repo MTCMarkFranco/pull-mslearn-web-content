@@ -6,3 +6,4 @@ azure-ai-vision-imageanalysis
 python-dotenv
 aspose-svg-net
 openai
+azure-search-documents
