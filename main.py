@@ -2,6 +2,7 @@ import os
 from fpdf import FPDF  # Add import for PDF library
 from dotenv import load_dotenv
 from linkScraper import *
+from utilities import utilities
 
 # Load environment variables
 load_dotenv()
@@ -15,13 +16,22 @@ scraper = linkScraper(vision_endpoint, vision_key)
 scraper.get_all_links(start_url)
 
 # Generate PDFs from content list
-for idx, content in enumerate(scraper.content_list):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, content)
-    pdf.output(f"PDFs/content_{idx + 1}.pdf")
-
-print(f'Total number of pages visited: {len(scraper.visited)}')
-print(f'Total size of content list: {len(scraper.content_list)}')
+for idx, content in enumerate(scraper.webContentList):
+    try:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_font('ArialUnicode', '', 'ArialUnicodeMS.ttf', uni=True)
+        pdf.set_font("ArialUnicode", size=12)
+        
+        # Add URL and Type to the first page
+        pdf.multi_cell(0, 10, f"URL: {content.url}")
+        pdf.multi_cell(0, 10, f"Type of Link: {content.Type}")
+        pdf.ln(10)  # Add a line break
+        
+        pdf.multi_cell(0, 12, content.content)
+        filename = os.path.join("PDFs", utilities.url_to_filename(content.url))
+        pdf.output(filename)
+        print(f"Created PDF :' {filename} '")
+    except Exception as e:
+        print(f"Failed to create PDF :' {filename} '")
