@@ -33,4 +33,5 @@ class imageAnalysisClient:
                         words.append(word.text)
 
         word_list = ", ".join(words)
+        print(f"Converted image from url to text: {image_url}")
         return word_list
