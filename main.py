@@ -13,12 +13,17 @@ vision_endpoint = os.getenv('VISION_ENDPOINT')
 
 start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
 scraper = linkScraper(vision_endpoint, vision_key)
+
+try:
+    writeToIndex().create_index()
+except Exception as e:
+    if "already exists" in str(e):
+        print("Index already exists. Continuing...")
+
 scraper.get_all_links(start_url)
 
 # for idx, content in enumerate(scraper.webContentList):
     
-    # writeToIndex().create_index()
-
     # writeToIndex().write_to_index(content)
 
     # Generate PDFs from content list
