@@ -15,11 +15,11 @@ start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
 scraper = linkScraper(vision_endpoint, vision_key)
 scraper.get_all_links(start_url)
 
-#for idx, content in enumerate(scraper.webContentList):
+# for idx, content in enumerate(scraper.webContentList):
     
     # writeToIndex().create_index()
 
-    #writeToIndex().write_to_index(content)
+    # writeToIndex().write_to_index(content)
 
     # Generate PDFs from content list
     # for idx, content in enumerate(scraper.webContentList):

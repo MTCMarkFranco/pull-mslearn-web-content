@@ -5,8 +5,8 @@ from azure.core.credentials import AzureKeyCredential
 from openai import AzureOpenAI,completions
 from typing import List
 import json
-
 from dotenv import load_dotenv
+from models import categories
 
 load_dotenv('..')
 
@@ -18,8 +18,8 @@ class deriveArticleCategory:
                                     api_version=os.getenv('OPENAI_API_VERSION')
                                     )
 
-    def categorize_content(self, content: str, url: str, type: str) -> List[str]:
-            
+    def categorize_content(self, content: str, url: str, type: str) -> categories:
+        try:    
             query = f"Categorize the content: {content} and url: {url} and type: {type}"
 
             systemprompt = f"""
@@ -28,27 +28,26 @@ class deriveArticleCategory:
             
             categories are:
 
-            INFRASTRUCTURE
-            ARCHITECTURE
-            SECURITY
-            NETWORKING
-            COMPLIANCER
-            INTEGRATION
-            DATA
-            OPERATION
-            BACKUP
-            LICENSING
-            LOGGING
-            EXCEPTION HANDLING
-            BUSINESS CONTINUITY
+            Infrastructure
+            Architecture
+            Security
+            Networking
+            Compliance
+            Integration
+            Data
+            Operation
+            Backup
+            Licenses
+            Logging
+            Exception Handling
 
             If the content does not fit any of these categories, return: ['MISC']
             
             NOTE: The content can be a description of image or an article.
 
-            IMPORTANT: ONly return relevant categories or ['MISC'], nothing else except the category in the form of a Json Array of Strings.
-            """ + "\n{[category1, category2, category3, etc...]}"
-                       
+            IMPORTANT: Only return relevant categories or ['MISC'], nothing else except the category in the form of a Json Array of Strings
+            """
+                        
             completion = self.azureopenai_client.chat.completions.create( 
                         model=os.getenv('COMPLETIONS_MODEL'),
                         max_tokens=1200,
@@ -60,10 +59,20 @@ class deriveArticleCategory:
                         frequency_penalty=0,  
                         presence_penalty=0,
                         stop=None,  
-                        stream=False
+                        stream=False,
+                        response_format= { "type": "json_object"}
                         )
             
-           
-            return json.loads(completion.choices[0].message.content)
+            
+            # Assuming completion.choices[0].message.content contains the JSON string
+            json_string = completion.choices[0].message.content
+
+            data = json.loads(json_string)
+            categories_obj=data["categories"]
+                                        
+            return categories_obj
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return ["MISC"]
 
 

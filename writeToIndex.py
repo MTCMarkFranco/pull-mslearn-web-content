@@ -105,21 +105,27 @@ class writeToIndex:
         print(f"Created index: {result.name}")
 
     def write_to_index(self, webcontent: webContent) -> str:
-        search_client = SearchClient(endpoint=self.search_endpoint, index_name=self.search_index, credential=AzureKeyCredential(self.key))
-        
-        # content_response = self.azureopenai_client.embeddings.create(input=webcontent.content, model=self.openai_embedding_model)
-        # content_embeddings = [item.embedding for item in content_response.data]
+        try:
+            search_client = SearchClient(endpoint=self.search_endpoint, index_name=self.search_index, credential=AzureKeyCredential(self.key))
+            
+            # Check if all required values are present in webcontent
+            required_fields = ['url', 'content', 'type', 'category']
+            for field in required_fields:
+                if not getattr(webcontent, field, None):
+                    raise ValueError(f"Missing required field: {field}")
 
-        document = {
-            "id": str(hash(webcontent.url)),
-            "url": webcontent.url,
-            "content": webcontent.content,
-            "type": webcontent.type,
-            "category": webcontent.category,
-            # "vectorized_content":content_embeddings
-        }
-        search_client.upload_documents(documents=[document])
-        print(f"Writing to index for {webcontent.url}")
+            # content_response = self.azureopenai_client.embeddings.create(input=webcontent.content, model=self.openai_embedding_model)
+            # content_embeddings = [item.embedding for item in content_response.data]
 
-
-
+            document = {
+                "id": str(hash(webcontent.url)),
+                "url": webcontent.url,
+                "content": webcontent.content,
+                "type": webcontent.type,
+                "category": webcontent.category,
+                # "vectorized_content": content_embeddings
+            }
+            search_client.upload_documents(documents=[document])
+            print(f"Writing to index for {webcontent.url}")
+        except Exception as e:
+            print(f"An error occurred: {e}")

@@ -10,7 +10,7 @@ from writeToIndex import writeToIndex
 class linkScraper:
     def __init__(self,endpoint, key):
         self.visited = set()
-        #self.webContentList = []
+        # self.webContentList = []
         self.image_client = imageAnalysisClient(endpoint=endpoint, key=key)
      
 
@@ -44,18 +44,19 @@ class linkScraper:
             currentWebContent.content = image_description
             currentWebContent.Type = 'IMAGE'
             currentWebContent.category = deriveArticleCategory().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.Type)
-            
+            writeToIndex().write_to_index(currentWebContent)
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
             currentWebContent.content = soup.get_text()
             currentWebContent.Type = 'ARTICLE'
             currentWebContent.category = deriveArticleCategory().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.Type)
+            writeToIndex().write_to_index(currentWebContent)
 
-            # for link in soup.find_all('a', href=True, recursive=True):
-            #     full_url = urljoin(url, link['href'])
-            #     if full_url not in self.visited and full_url.startswith('https://learn.microsoft.com/en-us/azure/architecture'):
-            #         print(full_url)
-            #         self.get_all_links(full_url)
+            for link in soup.find_all('a', href=True, recursive=True):
+                full_url = urljoin(url, link['href'])
+                if full_url not in self.visited and full_url.startswith('https://learn.microsoft.com/en-us/azure/architecture'):
+                    print(full_url)
+                    self.get_all_links(full_url)
         
-        writeToIndex().write_to_index(currentWebContent)
-        #self.webContentList.append(currentWebContent)
+              
+        # self.webContentList.append(currentWebContent)
