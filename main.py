@@ -10,7 +10,7 @@ load_dotenv()
 vision_key = os.getenv('VISION_KEY')
 vision_endpoint = os.getenv('VISION_ENDPOINT')
 
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway'
 scraper = linkScraper(vision_endpoint, vision_key)
 scraper.get_all_links(start_url)
 
@@ -26,6 +26,7 @@ for idx, content in enumerate(scraper.webContentList):
         # Add URL and Type to the first page
         pdf.multi_cell(0, 10, f"URL: {content.url}")
         pdf.multi_cell(0, 10, f"Type of Link: {content.Type}")
+        pdf.multi_cell(0, 10, f"Category of Link: {content.category}")
                 
         pdf.multi_cell(0, 10, content.content)
         filename = os.path.join("PDFs", utilities.url_to_filename(content.url))

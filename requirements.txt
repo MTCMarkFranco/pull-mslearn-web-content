@@ -5,3 +5,4 @@ azure-cognitiveservices-vision-computervision
 azure-ai-vision-imageanalysis
 python-dotenv
 aspose-svg-net
+openai

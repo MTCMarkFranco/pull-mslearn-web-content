@@ -1,9 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from imageAnalysisClient  import imageAnalysisClient
+from imageAnalysisClient import imageAnalysisClient
 from utilities import utilities
 from models.webContent import webContent
+from deriveArticleCategory import deriveArticleCategory
 
 class linkScraper:
     def __init__(self,endpoint, key):
@@ -41,15 +42,18 @@ class linkScraper:
             image_description = self.image_client.describe_image(url)
             currentWebContent.content = image_description
             currentWebContent.Type = 'IMAGE'
+            currentWebContent.category = deriveArticleCategory().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.Type)
+            
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
             currentWebContent.content = soup.get_text()
             currentWebContent.Type = 'ARTICLE'
+            currentWebContent.category = deriveArticleCategory().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.Type)
 
-            for link in soup.find_all('a', href=True, recursive=True):
-                full_url = urljoin(url, link['href'])
-                if full_url not in self.visited and full_url.startswith('https://learn.microsoft.com/en-us/azure/architecture'):
-                    print(full_url)
-                    self.get_all_links(full_url)
+            # for link in soup.find_all('a', href=True, recursive=True):
+            #     full_url = urljoin(url, link['href'])
+            #     if full_url not in self.visited and full_url.startswith('https://learn.microsoft.com/en-us/azure/architecture'):
+            #         print(full_url)
+            #         self.get_all_links(full_url)
         
         self.webContentList.append(currentWebContent)
