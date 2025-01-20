@@ -10,8 +10,7 @@ load_dotenv()
 vision_key = os.getenv('VISION_KEY')
 vision_endpoint = os.getenv('VISION_ENDPOINT')
 
-
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture/example-scenario/hybrid/media/hybrid-file-share-dr-remote-local-branch-workers.svg#lightbox'
 scraper = linkScraper(vision_endpoint, vision_key)
 scraper.get_all_links(start_url)
 

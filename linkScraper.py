@@ -37,6 +37,8 @@ class linkScraper:
 
         if content_type.startswith("image/svg"):
             svg_image = utilities.convert_svg_to_png(url)
+            if( svg_image is None):
+                return
             image_description = self.image_client.describe_image_from_stream(url, svg_image)
             currentWebContent.content = image_description
             currentWebContent.Type = 'IMAGE'
