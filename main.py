@@ -10,9 +10,9 @@ load_dotenv()
 vision_key = os.getenv('VISION_KEY')
 vision_endpoint = os.getenv('VISION_ENDPOINT')
 
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture/icons/images/real-time-analytics.png'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
 scraper = htmlContentService(vision_endpoint, vision_key)
-htmlContentService(vision_endpoint,vision_key).pull_content(start_url, False)
+htmlContentService(vision_endpoint,vision_key).pull_content(start_url, True)
 
 # Generate PDFs from content list
 # for idx, content in enumerate(scraper.webContentList):
