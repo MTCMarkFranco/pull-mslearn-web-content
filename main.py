@@ -12,7 +12,8 @@ vision_endpoint = os.getenv('VISION_ENDPOINT')
 
 start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
 scraper = htmlContentService(vision_endpoint, vision_key)
-htmlContentService(vision_endpoint,vision_key).pull_content(start_url, True)
+
+scraper.pull_content(start_url, True)
 
 # Generate PDFs from content list
 # for idx, content in enumerate(scraper.webContentList):
