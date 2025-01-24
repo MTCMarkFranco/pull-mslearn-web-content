@@ -16,6 +16,7 @@ class htmlContentService:
     def pull_content(self, url, recursive=False):
         
         currentWebContent = webContent()
+        soup = BeautifulSoup("", 'html.parser')
         
         if url in self.visited:
             return
@@ -39,17 +40,17 @@ class htmlContentService:
         elif any(ext in content_type for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff']):
             keywords = self.image_client.describe_image(url)
             content = self.llm_client.get_image_detailed_decription_from_llm(keywords, url)
-            currentWebContent.Type = 'IMAGE'
+            currentWebContent.type = 'IMAGE'
         
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
             content = soup.get_text()
-            currentWebContent.Type = 'ARTICLE'
+            currentWebContent.type = 'ARTICLE'
         
         # Set the url, content and category
         currentWebContent.url = url
         currentWebContent.content = content
-        currentWebContent.category = llmToolsService().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.Type)
+        currentWebContent.category = llmToolsService().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.type)
         
         # Write to index
         indexService().write_to_index(currentWebContent)
