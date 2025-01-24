@@ -10,6 +10,7 @@ class htmlContentService:
     def __init__(self,endpoint, key):
         self.visited = set()
         self.image_client = imageAnalysisService(endpoint=endpoint, key=key)
+        self.llm_client = llmToolsService()
      
 
     def pull_content(self, url, recursive=False):
@@ -36,7 +37,8 @@ class htmlContentService:
         if content_type.startswith("image/svg"): # not supported by service as of Jan 2025
             return
         elif any(ext in content_type for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff']):
-            content = self.image_client.describe_image(url)
+            keywords = self.image_client.describe_image(url)
+            content = self.llm_client.get_image_detailed_decription_from_llm(keywords, url)
             currentWebContent.Type = 'IMAGE'
         
         else:
