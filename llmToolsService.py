@@ -8,9 +8,9 @@ import json
 from dotenv import load_dotenv
 from models import categories
 
-load_dotenv('..')
+load_dotenv()
 
-class deriveArticleCategory:
+class llmToolsService:
     def __init__(self):
         self.azureopenai_client = AzureOpenAI(
                                     api_key=os.getenv('AZURE_OPENAI_KEY'),  
@@ -74,5 +74,54 @@ class deriveArticleCategory:
         except Exception as e:
             print(f"An error occurred: {e}")
             return ["MISC"]
+
+
+    def get_image_detailed_decription_from_llm(self, keywords: str, imageUrl: str) -> str:
+            try:    
+                query = f"analyze the attached image and use the following keywords to help you perform your functions: {keywords}"
+
+                systemprompt = f"""
+                            You are an image processor. Your task is to analyze an image and provide a detailed description based on given keywords. 
+                            For general images, describe what the image depicts in natural language, incorporating the provided keywords. 
+                            If the image is an architecture diagram, explain the flows between components and identify the architecture pattern being conveyed.
+                            As a second step, generate compliant Mermaid script markdown to recreate the diagram. Do not use parentheses to denote comments or 
+                            aliases, as this symbol is dedicated to a Mermaid script character. 
+                            Additionally, avoid using parentheses in labels within the Mermaid script to ensure compliance.
+                """
+                            
+                completion = self.azureopenai_client.chat.completions.create( 
+                            model=os.getenv('COMPLETIONS_MODEL'),
+                            max_tokens=800,
+                            temperature=0.7,
+                            messages=[
+                                {"role": "system", "content": systemprompt},
+                                {"role": "user", "content": 
+                                    [
+                                       {
+                                        "type": "text",
+                                        "text":  query
+                                       },
+                                       {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": f"{imageUrl}"
+                                        }
+                                    }
+                                    ] }],
+                            top_p=0.95,  
+                            frequency_penalty=0,  
+                            presence_penalty=0,
+                            stop=None,  
+                            stream=False,
+                            response_format= { "type": "text"}
+                            )
+                
+                
+                # Assuming completion.choices[0].message.content contains the JSON string
+                return completion.choices[0].message.content
+
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return f"Error Processing Image: {imageUrl}"
 
 

@@ -3,7 +3,7 @@ from azure.ai.vision.imageanalysis import ImageAnalysisClient as AzureImageAnaly
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
 
-class imageAnalysisClient:
+class imageAnalysisService:
     def __init__(self, endpoint, key):
         self.endpoint = endpoint
         self.key = key
