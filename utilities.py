@@ -36,14 +36,11 @@ class utilities:
         options = svg.rendering.image.ImageRenderingOptions()
         options.background_color = drawing.Color.transparent
         options.page_setup.sizing = svg.rendering.SizingType.FIT_CONTENT
+                
         
-        try:
-            with io.BytesIO() as output_stream:
-                device = svg.rendering.image.ImageDevice(options, output_stream)
-                renderer = svg.rendering.SvgRenderer()
-                renderer.render(device, document)
-                output_stream.seek(0)
-                return output_stream.read()
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return None
+        with io.BytesIO() as output_stream:
+            device = svg.rendering.image.ImageDevice(options, output_stream)
+            renderer = svg.rendering.SvgRenderer()
+            renderer.render(device, document)
+            output_stream.seek(0)
+            return output_stream.read()

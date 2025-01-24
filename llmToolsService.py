@@ -8,7 +8,7 @@ import json
 from dotenv import load_dotenv
 from models import categories
 
-load_dotenv('..')
+load_dotenv()
 
 class deriveArticleCategory:
     def __init__(self):
@@ -46,6 +46,42 @@ class deriveArticleCategory:
             NOTE: The content can be a description of image or an article.
 
             IMPORTANT: Only return relevant categories or ['MISC'], nothing else except the category in the form of a Json Array of Strings
+            """
+                        
+            completion = self.azureopenai_client.chat.completions.create( 
+                        model=os.getenv('COMPLETIONS_MODEL'),
+                        max_tokens=1200,
+                        temperature=0.4,
+                        messages=[
+                             {"role": "system", "content": systemprompt},
+                             {"role": "user", "content": query }],
+                        top_p=0.95,  
+                        frequency_penalty=0,  
+                        presence_penalty=0,
+                        stop=None,  
+                        stream=False,
+                        response_format= { "type": "json_object"}
+                        )
+            
+            
+            # Assuming completion.choices[0].message.content contains the JSON string
+            json_string = completion.choices[0].message.content
+
+            data = json.loads(json_string)
+            categories_obj=data["categories"]
+                                        
+            return categories_obj
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return ["MISC"]
+
+
+def get_image_detailed_decription_from_llm(self, content: str, url: str, type: str) -> categories:
+        try:    
+            query = f"Categorize the content: {content} and url: {url} and type: {type}"
+
+            systemprompt = f"""
+                        
             """
                         
             completion = self.azureopenai_client.chat.completions.create( 
