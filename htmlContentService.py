@@ -11,7 +11,7 @@ class htmlContentService:
         self.visited = set()
         self.image_client = imageAnalysisService(endpoint=endpoint, key=key)
         self.llm_client = llmToolsService()
-     
+        self.index_service = indexService()
 
     def pull_content(self, url, recursive=False):
         
@@ -53,11 +53,11 @@ class htmlContentService:
         currentWebContent.category = llmToolsService().categorize_content(currentWebContent.content, currentWebContent.url, currentWebContent.type)
         
         # Write to index
-        indexService().write_to_index(currentWebContent)
+        self.index_service.write_to_index(currentWebContent)
                 
         # If recursive, find all links on the page and process them
         for link in soup.find_all('a', href=True, recursive=True):
             full_url = urljoin(url, link['href'])
             if (full_url not in self.visited and full_url.startswith('https://learn.microsoft.com/en-us/azure/architecture')) and recursive:
                 print(f"Following Link: {full_url}")
-                self.get_all_links(full_url)
+                self.pull_content(full_url, True)

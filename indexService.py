@@ -44,12 +44,11 @@ class indexService:
                                     api_version=os.getenv('OPENAI_API_VERSION')
                                     )
         
-        if(self.index_client.get_index(self.search_index)):
-            print(f"Index {self.search_index} already exists")
-        else:
+        try:
+            self.index_client.get_index(self.search_index)
+        except Exception as e:
             print(f"Index {self.search_index} does not exist. Creating index...")
             self.create_index()
-
 
     def create_index(self):
         
