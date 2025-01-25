@@ -116,18 +116,19 @@ class indexService:
                 if not getattr(webcontent, field, None):
                     raise ValueError(f"Missing required field: {field}")
 
-            # content_response = self.azureopenai_client.embeddings.create(input=webcontent.content, model=self.openai_embedding_model)
-            # content_embeddings = [item.embedding for item in content_response.data]
-
-            document = {
-                "id": str(hash(webcontent.url)),
-                "url": webcontent.url,
-                "content": webcontent.content,
-                "type": webcontent.type,
-                "category": webcontent.category,
-                # "vectorized_content": content_embeddings
-            }
-            search_client.upload_documents(documents=[document])
+            documents = []
+            for key, content in webcontent.content.items():
+                document = {
+                    "id": str(hash(webcontent.url + key)),
+                    "url": webcontent.url,
+                    "content": content,
+                    "type": webcontent.type,
+                    "category": webcontent.category,
+                    # "vectorized_content": content_embeddings
+                }
+                documents.append(document)
+            
+            search_client.upload_documents(documents=documents)
             print(f"Writing to index for {webcontent.url}")
         except Exception as e:
             print(f"An error occurred: {e}")
