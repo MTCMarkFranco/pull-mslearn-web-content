@@ -5,10 +5,7 @@ from azure.core.credentials import AzureKeyCredential
 from openai import AzureOpenAI,completions
 from typing import List
 import json
-from dotenv import load_dotenv
 from models import categories
-
-load_dotenv()
 
 class llmToolsService:
     def __init__(self):

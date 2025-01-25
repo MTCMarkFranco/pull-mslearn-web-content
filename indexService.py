@@ -23,10 +23,6 @@ from azure.search.documents.indexes.models import (
     VectorSearchAlgorithmConfiguration
 )
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 class indexService:
     def __init__(self):
         self.key = os.getenv('SEARCH_KEY')

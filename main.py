@@ -10,10 +10,10 @@ load_dotenv()
 vision_key = os.getenv('VISION_KEY')
 vision_endpoint = os.getenv('VISION_ENDPOINT')
 
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture/best-practices/auto-scaling'
 scraper = htmlContentService(vision_endpoint, vision_key)
 
-scraper.pull_content(start_url, True)
+scraper.pull_content(start_url, False)
 
 # Generate PDFs from content list
 # for idx, content in enumerate(scraper.webContentList):
