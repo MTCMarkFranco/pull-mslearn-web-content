@@ -2,7 +2,7 @@ import os
 from azure.ai.vision.imageanalysis import ImageAnalysisClient as AzureImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
-from openai import AzureOpenAI,completions
+from openai import AzureOpenAI, completions
 from typing import List
 import json
 from models import categories
@@ -14,6 +14,8 @@ class llmToolsService:
                                     azure_endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),
                                     api_version=os.getenv('OPENAI_API_VERSION')
                                     )
+        self.completions_model = os.getenv('COMPLETIONS_MODEL')
+        self.embedding_model = os.getenv('OPENAI_EMBEDDING_MODEL')
 
     def categorize_content(self, content: str, url: str, type: str) -> categories:
         try:    
@@ -46,7 +48,7 @@ class llmToolsService:
             """
                         
             completion = self.azureopenai_client.chat.completions.create( 
-                        model=os.getenv('COMPLETIONS_MODEL'),
+                        model=self.completions_model,
                         max_tokens=1200,
                         temperature=0.4,
                         messages=[
@@ -74,51 +76,63 @@ class llmToolsService:
 
 
     def get_image_detailed_decription_from_llm(self, keywords: str, imageUrl: str) -> str:
-            try:    
-                query = f"analyze the attached image and use the following keywords to help you perform your functions: {keywords}"
+        try:    
+            query = f"analyze the attached image and use the following keywords to help you perform your functions: {keywords}"
 
-                systemprompt = f"""
-                            You are an image processor. Your task is to analyze an image and provide a detailed description based on given keywords. 
-                            For general images, describe what the image depicts in natural language, incorporating the provided keywords. 
-                            If the image is an architecture diagram, explain the flows between components and identify the architecture pattern being conveyed.
-                            As a second step, generate compliant Mermaid script markdown to recreate the diagram. Do not use parentheses to denote comments or 
-                            aliases, as this symbol is dedicated to a Mermaid script character. 
-                            Additionally, avoid using parentheses in labels within the Mermaid script to ensure compliance.
-                """
-                            
-                completion = self.azureopenai_client.chat.completions.create( 
-                            model=os.getenv('COMPLETIONS_MODEL'),
-                            max_tokens=800,
-                            temperature=0.7,
-                            messages=[
-                                {"role": "system", "content": systemprompt},
-                                {"role": "user", "content": 
-                                    [
-                                       {
-                                        "type": "text",
-                                        "text":  query
-                                       },
-                                       {
-                                        "type": "image_url",
-                                        "image_url": {
-                                            "url": f"{imageUrl}"
-                                        }
+            systemprompt = f"""
+                        You are an image processor. Your task is to analyze an image and provide a detailed description based on given keywords. 
+                        For general images, describe what the image depicts in natural language, incorporating the provided keywords. 
+                        If the image is an architecture diagram, explain the flows between components and identify the architecture pattern being conveyed.
+            """
+                        # As a second step, generate compliant Mermaid script markdown to recreate the diagram. Do not use parentheses to denote comments or 
+                        # aliases, as this symbol is dedicated to a Mermaid script character. 
+                        # Additionally, avoid using parentheses in labels within the Mermaid script to ensure compliance.
+            
+                        
+            completion = self.azureopenai_client.chat.completions.create( 
+                        model=self.completions_model,
+                        max_tokens=800,
+                        temperature=0.7,
+                        messages=[
+                            {"role": "system", "content": systemprompt},
+                            {"role": "user", "content": 
+                                [
+                                   {
+                                    "type": "text",
+                                    "text":  query
+                                   },
+                                   {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"{imageUrl}"
                                     }
-                                    ] }],
-                            top_p=0.95,  
-                            frequency_penalty=0,  
-                            presence_penalty=0,
-                            stop=None,  
-                            stream=False,
-                            response_format= { "type": "text"}
-                            )
-                
-                
-                # Assuming completion.choices[0].message.content contains the JSON string
-                return completion.choices[0].message.content
+                                }
+                                ] }],
+                        top_p=0.95,  
+                        frequency_penalty=0,  
+                        presence_penalty=0,
+                        stop=None,  
+                        stream=False,
+                        response_format= { "type": "text"}
+                        )
+            
+            
+            # Assuming completion.choices[0].message.content contains the JSON string
+            return completion.choices[0].message.content
 
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                return f"Error Processing Image: {imageUrl}"
-
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return f"Error Processing Image: {imageUrl}"
+            
+    def vectorize_chunk(self, chunk: str) -> List[float]:
+        try:
+            response = self.azureopenai_client.Embedding.create(
+                input=chunk,
+                model=self.embedding_model,
+                engine=self.embedding_model
+            )
+            return response['data'][0]['embedding']
+        except Exception as e:
+            print(f"An error occurred during vectorization: {e}")
+            return []
 

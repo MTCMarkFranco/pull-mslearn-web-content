@@ -20,6 +20,7 @@ class htmlContentService:
         currentWebContent = webContent()
         soup = BeautifulSoup("", 'html.parser')
         content_chunks = {}
+        vectorized_content_chunks = {}
         full_document_text = ""
             
         if url in self.visited:
@@ -69,13 +70,16 @@ class htmlContentService:
                     for j in range(0, len(section_content), self.chunk_size):
                         chunk_key = f"{section_text} (part {j // self.chunk_size + 1})"
                         content_chunks[chunk_key] = section_content[j:j + self.chunk_size]
+                        vectorized_content_chunks[chunk_key] = self.llm_client.vectorize_chunk(section_content[j:j + self.chunk_size])
                 else:
                     content_chunks[section_text] = section_content
+                    vectorized_content_chunks[section_text] = self.llm_client.vectorize_chunk(section_content)
            
-        # Set the url, content chunks and category
+        # Set the url, content chunks, category, and content embeddings
         currentWebContent.url = url
         currentWebContent.content = content_chunks
         currentWebContent.category = llmToolsService().categorize_content(full_document_text, currentWebContent.url, currentWebContent.type)
+        currentWebContent.content_embeddings = vectorized_content_chunks
         
         # Write to index
         self.index_service.write_to_index(currentWebContent)

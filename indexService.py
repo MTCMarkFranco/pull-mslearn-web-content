@@ -119,12 +119,13 @@ class indexService:
             documents = []
             for key, content in webcontent.content.items():
                 document = {
-                    "id": str(hash(webcontent.url + key)),
+                    "chunk_id": str(hash(webcontent.url + key)),
+                    "parent_id": str(hash(webcontent.url)),
                     "url": webcontent.url,
                     "content": content,
                     "type": webcontent.type,
                     "category": webcontent.category,
-                    # "vectorized_content": content_embeddings
+                    "vectorized_content": webcontent.content_embeddings[key]  # Add vectorized content
                 }
                 documents.append(document)
             
