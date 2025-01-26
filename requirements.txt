@@ -7,3 +7,4 @@ python-dotenv
 aspose-svg-net
 openai
 azure-search-documents
+transformers

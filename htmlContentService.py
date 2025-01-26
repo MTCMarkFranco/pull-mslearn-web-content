@@ -6,6 +6,7 @@ from imageAnalysisService import imageAnalysisService
 from models.webContent import webContent
 from llmToolsService import llmToolsService
 from indexService import indexService
+from transformers import GPT2Tokenizer
 
 class htmlContentService:
     def __init__(self,endpoint, key):
@@ -13,7 +14,8 @@ class htmlContentService:
         self.image_client = imageAnalysisService(endpoint=endpoint, key=key)
         self.llm_client = llmToolsService()
         self.index_service = indexService()
-        self.chunk_size = os.getenv('CHUNK_SIZE')
+        self.chunk_size = int(os.getenv('CHUNK_SIZE'))
+        self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
     def pull_content(self, url, recursive=False):
         
@@ -61,16 +63,20 @@ class htmlContentService:
                 
                 # Find the content between the current section and the next section
                 if next_section:
-                    section_content = ''.join(str(tag) for tag in section.find_all_next() if tag != next_section)
+                    section_content = ''.join(tag.get_text() for tag in section.find_all_next() if tag != next_section and tag.name != 'h2' and tag.find_previous('h2') == section)
                 else:
-                    section_content = ''.join(str(tag) for tag in section.find_all_next())
+                    section_content = ''.join(tag.get_text() for tag in section.find_all_next() if tag.name != 'h2' and tag.find_previous('h2') == section)    
+                    
+                tokens = self.tokenizer.encode(section_content)
                 
-                # Split the content into smaller chunks if it exceeds 5000 characters
-                if len(section_content) > self.chunk_size:
-                    for j in range(0, len(section_content), self.chunk_size):
+                # Split the content into smaller chunks if it exceeds the chunk size in tokens
+                if len(tokens) > self.chunk_size:
+                    for j in range(0, len(tokens), self.chunk_size):
+                        chunk_tokens = tokens[j:j + self.chunk_size]
+                        chunk_text = self.tokenizer.decode(chunk_tokens)
                         chunk_key = f"{section_text} (part {j // self.chunk_size + 1})"
-                        content_chunks[chunk_key] = section_content[j:j + self.chunk_size]
-                        vectorized_content_chunks[chunk_key] = self.llm_client.vectorize_chunk(section_content[j:j + self.chunk_size])
+                        content_chunks[chunk_key] = chunk_text
+                        vectorized_content_chunks[chunk_key] = self.llm_client.vectorize_chunk(chunk_text)
                 else:
                     content_chunks[section_text] = section_content
                     vectorized_content_chunks[section_text] = self.llm_client.vectorize_chunk(section_content)

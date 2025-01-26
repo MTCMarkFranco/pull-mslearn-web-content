@@ -16,6 +16,7 @@ class llmToolsService:
                                     )
         self.completions_model = os.getenv('COMPLETIONS_MODEL')
         self.embedding_model = os.getenv('OPENAI_EMBEDDING_MODEL')
+        self.embedding_model_dimensions = int(os.getenv('OPENAI_EMBEDDING_MODEL_DIMENSIONS'))
 
     def categorize_content(self, content: str, url: str, type: str) -> categories:
         try:    
@@ -126,12 +127,15 @@ class llmToolsService:
             
     def vectorize_chunk(self, chunk: str) -> List[float]:
         try:
-            response = self.azureopenai_client.Embedding.create(
+            response = self.azureopenai_client.embeddings.create(
                 input=chunk,
                 model=self.embedding_model,
-                engine=self.embedding_model
+                dimensions=self.embedding_model_dimensions,
+                encoding_format="float"
             )
-            return response['data'][0]['embedding']
+            
+            embedding = response.data[0].embedding
+            return embedding
         except Exception as e:
             print(f"An error occurred during vectorization: {e}")
             return []
