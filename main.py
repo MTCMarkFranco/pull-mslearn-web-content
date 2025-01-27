@@ -15,23 +15,4 @@ scraper = htmlContentService(vision_endpoint, vision_key)
 
 scraper.pull_content(start_url, True)
 
-# Generate PDFs from content list
-# for idx, content in enumerate(scraper.webContentList):
-#     try:
-#         pdf = FPDF()
-#         pdf.add_page()
-#         pdf.set_auto_page_break(auto=False, margin=15)
-#         pdf.add_font('ArialUnicode', '', 'ArialUnicodeMS.ttf', uni=True)
-#         pdf.set_font("ArialUnicode", size=12)
-        
-#         # Add URL and Type to the first page
-#         pdf.multi_cell(0, 12, f"URL: {content.url}")
-#         pdf.multi_cell(0, 12, f"Type of Link: {content.Type}")
-#         pdf.ln(10)  # Add a line break
-        
-#         pdf.multi_cell(0, 12, content.content)
-#         filename = os.path.join("PDFs", utilities.url_to_filename(content.url))
-#         pdf.output(filename)
-#         print(f"Created PDF :' {filename} '")
-#     except Exception as e:
-#         print(f"Failed to create PDF :' {filename} '")
+print("Content has been scraped and indexed!")
