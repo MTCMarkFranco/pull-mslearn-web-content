@@ -6,7 +6,7 @@ from imageAnalysisService import imageAnalysisService
 from models.webContent import webContent
 from llmToolsService import llmToolsService
 from indexService import indexService
-from transformers import GPT2Tokenizer
+import tiktoken
 
 class htmlContentService:
     def __init__(self,endpoint, key):
@@ -15,7 +15,7 @@ class htmlContentService:
         self.llm_client = llmToolsService()
         self.index_service = indexService()
         self.chunk_size = int(os.getenv('CHUNK_SIZE'))
-        self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        self.tokenizer = tiktoken.get_encoding("cl100k_base")
 
     def pull_content(self, url, recursive=False):
         
