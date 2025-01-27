@@ -9,14 +9,14 @@ from indexService import indexService
 import tiktoken
 
 class htmlContentService:
-    def __init__(self,endpoint, key):
+    def __init__(self):
         self.visited = set()
-        self.image_client = imageAnalysisService(endpoint=endpoint, key=key)
+        self.image_client = imageAnalysisService()
         self.llm_client = llmToolsService()
         self.index_service = indexService()
         self.chunk_size = int(os.getenv('CHUNK_SIZE'))
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
-
+        
     def pull_content(self, url, recursive=False):
         
         currentWebContent = webContent()

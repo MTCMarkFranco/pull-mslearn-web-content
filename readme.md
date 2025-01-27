@@ -19,11 +19,9 @@ This project is designed to pull content from web pages, analyze images, categor
 ## Usage
 
 ```python
-from htmlContentService import htmlContentService
+from content_service import ContentService
 
-endpoint = "your_image_analysis_endpoint"
-key = "your_image_analysis_key"
-service = htmlContentService(endpoint, key)
+service = ContentService()
 
 url = "https://example.com"
 service.pull_content(url, recursive=True)
@@ -31,7 +29,5 @@ service.pull_content(url, recursive=True)
 
 ## TODO
 
-1. Enable chunking of articles and images.
-2. Implement a conversion function from SVG to PNG.
-3. Add a column in the index for vectorized chunks.
-4. Add code to enable an optimized chunking strategy with parent chunk relationships.
+1. Implement a conversion function from SVG to PNG.
+

@@ -4,17 +4,17 @@ from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
 
 class imageAnalysisService:
-    def __init__(self, endpoint, key):
-        self.endpoint = endpoint
-        self.key = key
-
+    def __init__(self, ):
+        self.vision_key = os.getenv('VISION_KEY')
+        self.vision_endpoint = os.getenv('VISION_ENDPOINT')
+    
     def describe_image(self, image_url: str) -> str:
                
 
         # Create an Image Analysis client
         client = AzureImageAnalysisClient(
-            endpoint=self.endpoint,
-            credential=AzureKeyCredential(self.key)
+            endpoint=self.vision_endpoint,
+            credential=AzureKeyCredential(self.vision_key)
         )
 
         # Get a caption for the image. This will be a synchronously (blocking) call.

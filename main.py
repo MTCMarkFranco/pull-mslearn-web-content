@@ -7,11 +7,10 @@ from utilities import utilities
 # Load environment variables
 load_dotenv()
 
-vision_key = os.getenv('VISION_KEY')
-vision_endpoint = os.getenv('VISION_ENDPOINT')
-
+# Begin Program
 start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
-scraper = htmlContentService(vision_endpoint, vision_key)
+
+scraper = htmlContentService()
 
 scraper.pull_content(start_url, True)
 
