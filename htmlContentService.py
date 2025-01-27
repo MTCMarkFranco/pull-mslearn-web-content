@@ -48,6 +48,7 @@ class htmlContentService:
             keywords = self.image_client.describe_image(url)
             full_document_text = self.llm_client.get_image_detailed_decription_from_llm(keywords, url)
             content_chunks[url] = full_document_text # No chunking required here as we are controlling the llm response size window for image description
+            vectorized_content_chunks[url] = self.llm_client.vectorize_chunk(full_document_text)
             currentWebContent.type = 'IMAGE'
         
         else:
@@ -56,9 +57,9 @@ class htmlContentService:
             full_document_text = soup.get_text()
             docSections = soup.select('h2[id]')
             
-            # Iterate through the sections and collect content between them
+            # Iterate through the sections and collect content between them anf content to chunks
             for i, section in enumerate(docSections):
-                section_text = section.get_text()
+                section_title = section.get_text()
                 next_section = docSections[i + 1] if i + 1 < len(docSections) else None
                 
                 # Find the content between the current section and the next section
@@ -74,12 +75,12 @@ class htmlContentService:
                     for j in range(0, len(tokens), self.chunk_size):
                         chunk_tokens = tokens[j:j + self.chunk_size]
                         chunk_text = self.tokenizer.decode(chunk_tokens)
-                        chunk_key = f"{section_text} (part {j // self.chunk_size + 1})"
+                        chunk_key = f"{section_title} (part {j // self.chunk_size + 1})"
                         content_chunks[chunk_key] = chunk_text
                         vectorized_content_chunks[chunk_key] = self.llm_client.vectorize_chunk(chunk_text)
                 else:
-                    content_chunks[section_text] = section_content
-                    vectorized_content_chunks[section_text] = self.llm_client.vectorize_chunk(section_content)
+                    content_chunks[section_title] = section_content
+                    vectorized_content_chunks[section_title] = self.llm_client.vectorize_chunk(section_content)
            
         # Set the url, content chunks, category, and content embeddings
         currentWebContent.url = url

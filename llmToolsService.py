@@ -16,7 +16,7 @@ class llmToolsService:
                                     )
         self.completions_model = os.getenv('COMPLETIONS_MODEL')
         self.embedding_model = os.getenv('OPENAI_EMBEDDING_MODEL')
-        self.embedding_model_dimensions = int(os.getenv('OPENAI_EMBEDDING_MODEL_DIMENSIONS'))
+        self.azure_openai_embedding_dimensions = int(os.getenv('AZURE_OPENAI_EMBEDDING_DIMENSIONS'))
 
     def categorize_content(self, content: str, url: str, type: str) -> categories:
         try:    
@@ -130,7 +130,7 @@ class llmToolsService:
             response = self.azureopenai_client.embeddings.create(
                 input=chunk,
                 model=self.embedding_model,
-                dimensions=self.embedding_model_dimensions,
+                dimensions=self.azure_openai_embedding_dimensions,
                 encoding_format="float"
             )
             
