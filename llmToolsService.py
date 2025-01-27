@@ -24,9 +24,16 @@ class llmToolsService:
 
             systemprompt = f"""
             
-            you are an expert at categorizing content. You will be given content and a url and you must return the categories of the content. The possible
+            you are an expert at categorizing content. You will be given content and a url and you must return the most relevant categories of the content. 
             
-            categories are:
+            If the content does not fit any of these categories, return: ['MISC']
+                        
+            The content can be a description of image or an article.
+
+            IMPORTANT: Only return relevant categories or ['MISC'], nothing else except the category in the form of a Json Array of Strings
+            IMPORTANT: When identifying categories, try to suggest as few categories as possible, keeping the relevancy high.
+            
+            Select only from the categories below. they are as follows:
 
             Infrastructure
             Architecture
@@ -40,12 +47,25 @@ class llmToolsService:
             Licenses
             Logging
             Exception Handling
-
-            If the content does not fit any of these categories, return: ['MISC']
-            
-            NOTE: The content can be a description of image or an article.
-
-            IMPORTANT: Only return relevant categories or ['MISC'], nothing else except the category in the form of a Json Array of Strings
+            AI and Machine Learning
+            Analytics
+            Compute
+            Containers
+            Developer Tools
+            DevOps
+            Hybrid Cloud
+            Identity
+            IoT
+            Messaging
+            Monitoring
+            Storage
+            Web
+            Migration
+            Virtual Desktop Infrastructure
+            Resiliency
+            Disaster Recovery
+            Scaling
+            Performance
             """
                         
             completion = self.azureopenai_client.chat.completions.create( 
