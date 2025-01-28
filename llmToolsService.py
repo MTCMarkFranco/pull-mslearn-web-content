@@ -5,6 +5,8 @@ from azure.core.credentials import AzureKeyCredential
 from openai import AzureOpenAI, completions
 from typing import List
 import json
+
+from pydantic_core import Url
 from models import categories
 
 class llmToolsService:
@@ -96,39 +98,48 @@ class llmToolsService:
             return ["MISC"]
 
 
-    def get_image_detailed_decription_from_llm(self, keywords: str, imageUrl: str) -> str:
+    def get_image_detailed_decription_from_llm(self, keywords: str = "", imageUrl: Url = None, imagSVGData: str = None) -> str:
         try:    
-            query = f"analyze the attached image and use the following keywords to help you perform your functions: {keywords}"
+            query = f"""
+                    analyze the attached (image_url) / embedded (image data in SVG Format:) image and use the following keywords (if present) to help you perform your functions: {keywords}"
+                    """
 
             systemprompt = f"""
-                        You are an image processor. Your task is to analyze an image and provide a detailed description based on given keywords. 
-                        For general images, describe what the image depicts in natural language, incorporating the provided keywords. 
-                        If the image is an architecture diagram, explain the flows between components and identify the architecture pattern being conveyed.
-            """
-                        # As a second step, generate compliant Mermaid script markdown to recreate the diagram. Do not use parentheses to denote comments or 
-                        # aliases, as this symbol is dedicated to a Mermaid script character. 
-                        # Additionally, avoid using parentheses in labels within the Mermaid script to ensure compliance.
+                            You are an image processor. Your task is to analyze an image and provide a detailed description based on given keywords. 
+                            For general images, describe what the image depicts in natural language, incorporating the provided keywords. 
+                            If the image is an architecture diagram, explain the flows between components and identify the architecture pattern being conveyed.
+                            """
+                            # As a second step, generate compliant Mermaid script markdown to recreate the diagram. Do not use parentheses to denote comments or 
+                            # aliases, as this symbol is dedicated to a Mermaid script character. 
+                            # Additionally, avoid using parentheses in labels within the Mermaid script to ensure compliance.
             
+            # inistialize messages with query
+            messages = [
+                        {
+                            "type": "text",
+                            "text": query
+                        }
                         
+                    ]
+              
+            # add image data if present
+            if imagSVGData:
+                system_prompt += f" image data in SVG Format:{imagSVGData}"
+            else:
+                # add image url if present
+                messages.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"{imageUrl}"
+                }
+            })
+
+        
             completion = self.azureopenai_client.chat.completions.create( 
                         model=self.completions_model,
                         max_tokens=800,
                         temperature=0.7,
-                        messages=[
-                            {"role": "system", "content": systemprompt},
-                            {"role": "user", "content": 
-                                [
-                                   {
-                                    "type": "text",
-                                    "text":  query
-                                   },
-                                   {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": f"{imageUrl}"
-                                    }
-                                }
-                                ] }],
+                        messages = messages,
                         top_p=0.95,  
                         frequency_penalty=0,  
                         presence_penalty=0,

@@ -2,15 +2,14 @@ import os
 from azure.ai.vision.imageanalysis import ImageAnalysisClient as AzureImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
+from pydantic_core import Url
 
 class imageAnalysisService:
     def __init__(self, ):
         self.vision_key = os.getenv('VISION_KEY')
         self.vision_endpoint = os.getenv('VISION_ENDPOINT')
     
-    def describe_image(self, image_url: str) -> str:
-               
-
+    def describe_image(self, image_url: Url = None, image_data: str = None) -> str:
         # Create an Image Analysis client
         client = AzureImageAnalysisClient(
             endpoint=self.vision_endpoint,
@@ -18,11 +17,20 @@ class imageAnalysisService:
         )
 
         # Get a caption for the image. This will be a synchronously (blocking) call.
-        result = client.analyze_from_url(
-            image_url=image_url,
-            visual_features=[VisualFeatures.CAPTION, VisualFeatures.READ],
-            gender_neutral_caption=True,  # Optional (default is False)
-        )
+        if image_url:
+            result = client.analyze_from_url(
+                image_url=image_url,
+                visual_features=[VisualFeatures.CAPTION, VisualFeatures.READ],
+                gender_neutral_caption=True,  # Optional (default is False)
+            )
+        elif image_data:
+            result = client.analyze(
+                image_data=image_data,
+                visual_features=[VisualFeatures.CAPTION, VisualFeatures.READ],
+                gender_neutral_caption=True,  # Optional (default is False)
+            )
+        else:
+            raise ValueError("Either image_url or image_data must be provided")
 
         # Extract words from OCR results and create a comma-separated list
         words = []
@@ -37,8 +45,6 @@ class imageAnalysisService:
         return word_list
 
     def describe_image_from_stream(self, original_svg_url, image_stream: str) -> str:
-               
-
         # Create an Image Analysis client
         client = AzureImageAnalysisClient(
             endpoint=self.endpoint,
@@ -67,5 +73,4 @@ class imageAnalysisService:
         word_list = ", ".join(words)
         print(f"Converted SVG image from url to text: {original_svg_url}")
         return word_list
-        
-    
+

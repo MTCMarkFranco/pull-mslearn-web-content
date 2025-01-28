@@ -8,3 +8,5 @@ aspose-svg-net
 openai
 azure-search-documents
 tiktoken
+pillow==11.1.0
+lxml

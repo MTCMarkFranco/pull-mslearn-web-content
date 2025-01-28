@@ -8,10 +8,10 @@ from utilities import utilities
 load_dotenv()
 
 # Begin Program
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture/web-apps/guides/_images/modern-web-app-architecture.svg'
 
 scraper = htmlContentService()
 
-scraper.pull_content(start_url, True)
+scraper.pull_content(start_url, False)
 
 print("Content has been scraped and indexed!")
