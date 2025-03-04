@@ -8,7 +8,7 @@ from utilities import utilities
 load_dotenv()
 
 # Begin Program
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture/web-apps/guides/_images/modern-web-app-architecture.svg'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture/'
 
 scraper = htmlContentService()
 

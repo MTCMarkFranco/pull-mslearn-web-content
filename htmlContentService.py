@@ -63,8 +63,8 @@ class htmlContentService:
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
             currentWebContent.type = 'ARTICLE'
-            full_document_text = soup.get_text()
-            docSections = soup.select('h2')
+            full_document_text = soup.find('main').get_text()
+            docSections = soup.find('main').select('h2')
             
             # Iterate through the sections and collect content between them anf content to chunks
             for i, section in enumerate(docSections):
