@@ -74,7 +74,7 @@ class llmToolsService:
                         
             completion = self.azureopenai_client.chat.completions.create( 
                         model=self.completions_model,
-                        max_tokens=1200,
+                        max_tokens=800,
                         temperature=0.4,
                         messages=[
                              {"role": "system", "content": systemprompt},
@@ -161,7 +161,7 @@ class llmToolsService:
             
             completion = self.azureopenai_client.chat.completions.create( 
                         model=self.completions_model,
-                        max_tokens=1000,
+                        max_tokens=800,
                         temperature=0.7,
                         messages = chat_prompt,
                         top_p=0.95,  
