@@ -49,7 +49,3 @@ url = "https://example.com"
 service.pull_content(url, recursive=True)
 ```
 
-## TODO
-
-1. Implement a conversion function from SVG to PNG.
-
