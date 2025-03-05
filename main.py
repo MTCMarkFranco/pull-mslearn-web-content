@@ -16,7 +16,7 @@ load_dotenv()
 
 # Testing Image urls
 
-start_url = 'https://learn.microsoft.com/en-us/azure/architecture'
+start_url = 'https://learn.microsoft.com/en-us/azure/architecture/'
 
 scraper = htmlContentService()
 
