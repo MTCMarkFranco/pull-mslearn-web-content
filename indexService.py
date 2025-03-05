@@ -1,4 +1,5 @@
 import os
+import time
 from azure.ai.vision.imageanalysis import ImageAnalysisClient as AzureImageAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
@@ -117,6 +118,8 @@ class indexService:
                             vector_search=vector_search, 
                             semantic_search=semantic_search)
         result = self.index_client.create_or_update_index(index)
+        # wait for the index to be created
+        time.sleep(10) 
         print(f"Created index: {result.name}")
 
     def write_to_index(self, webcontent: webContent) -> str:

@@ -1,4 +1,5 @@
 import os
+from pydantic_core import Url
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -7,6 +8,7 @@ from models.webContent import webContent
 from llmToolsService import llmToolsService
 from indexService import indexService
 import tiktoken
+from utilities import utilities as utils
 
 class htmlContentService:
     def __init__(self):
@@ -43,10 +45,17 @@ class htmlContentService:
         content_type = response.headers['Content-Type']
 
         if content_type.startswith("image/svg"): # not supported by service as of Jan 2025
-            return
+            
+            svg_content = response.content.decode("utf-8")
+            full_document_text = self.llm_client.get_image_detailed_decription_from_llm(imagSVGData=svg_content)
+            content_chunks[url] = full_document_text # No chunking required here as we are controlling the llm response size window for image description
+            vectorized_content_chunks[url] = self.llm_client.vectorize_chunk(full_document_text)
+            currentWebContent.type = 'IMAGE'
+            
+
         elif any(ext in content_type for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff']):
-            keywords = self.image_client.describe_image(url)
-            full_document_text = self.llm_client.get_image_detailed_decription_from_llm(keywords, url)
+            keywords = self.image_client.describe_image(image_url=Url(url))
+            full_document_text = self.llm_client.get_image_detailed_decription_from_llm(keywords, imageUrl=Url(url))
             content_chunks[url] = full_document_text # No chunking required here as we are controlling the llm response size window for image description
             vectorized_content_chunks[url] = self.llm_client.vectorize_chunk(full_document_text)
             currentWebContent.type = 'IMAGE'
@@ -54,8 +63,8 @@ class htmlContentService:
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
             currentWebContent.type = 'ARTICLE'
-            full_document_text = soup.get_text()
-            docSections = soup.select('h2')
+            full_document_text = soup.find('main').get_text()
+            docSections = soup.find('main').select('h2')
             
             # Iterate through the sections and collect content between them anf content to chunks
             for i, section in enumerate(docSections):
