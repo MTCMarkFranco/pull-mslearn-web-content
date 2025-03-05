@@ -78,7 +78,7 @@ class llmToolsService:
             completion = self.azureopenai_client.chat.completions.create( 
                         model=self.completions_model,
                         max_tokens=800,
-                        temperature=0.4,
+                        temperature=0.6,
                         messages=[
                              {"role": "system", "content": systemprompt},
                              {"role": "user", "content": query }],
@@ -99,8 +99,8 @@ class llmToolsService:
                                         
             return categories_obj
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return ["MISC"]
+            print(f"Couldn't categorize content, assigning default 'Miscellaneous': {e}")
+            return ["Miscellaneous"]
 
 
     def get_image_detailed_decription_from_llm(self, keywords: str = "", imageUrl: Url = None, imagSVGData: str = None) -> str:
