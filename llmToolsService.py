@@ -180,7 +180,6 @@ class llmToolsService:
             return completion.choices[0].message.content
 
         except Exception as e:
-            print(f"An error occurred: {e}")
             return f"Error Processing Image: {imageUrl}"
             
     def vectorize_chunk(self, chunk: str) -> List[float]:
