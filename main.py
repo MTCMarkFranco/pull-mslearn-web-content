@@ -20,6 +20,6 @@ start_url = 'https://learn.microsoft.com/en-us/azure/architecture/'
 
 scraper = htmlContentService()
 
-scraper.pull_content(start_url, False)
+scraper.pull_content(start_url, True)
 
 print("Content has been scraped and indexed!")
