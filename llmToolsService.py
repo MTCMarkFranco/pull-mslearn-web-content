@@ -29,14 +29,16 @@ class llmToolsService:
             systemprompt = f"""
             
             you are an expert at categorizing content. You will be given content and a url and you must return the most relevant categories of the content. 
-            
-            If the content does not fit any of these categories, return: ['MISC']
-                        
+                                                
             The content can be a description of image or an article.
 
-            IMPORTANT: Only return relevant categories or ['MISC'], nothing else except the category in the form of a Json Array of Strings
+            IMPORTANT: Only return relevant categories, nothing else except the categories in the form of a Json Array of Strings
             IMPORTANT: When identifying categories, try to suggest as few categories as possible, keeping the relevancy high.
-            
+            IMPORTANT: only add the Miscellaneous category if the content does not fit into any of the other categories.
+            IMPORTANT: Do not add any other text or explanation, always return the categories in the form of a Json Array of Strings in this structure:
+            {{"categories": ["category1", "category2", "category3"]}}
+
+
             Select only from the categories below. they are as follows:
 
             Infrastructure
@@ -70,6 +72,7 @@ class llmToolsService:
             Disaster Recovery
             Scaling
             Performance
+            Miscellaneous
             """
                         
             completion = self.azureopenai_client.chat.completions.create( 
