@@ -19,7 +19,7 @@ class imageAnalysisService:
         # Get a caption for the image. This will be a synchronously (blocking) call.
         if image_url:
             result = client.analyze_from_url(
-                image_url=image_url,
+                image_url=str(image_url),
                 visual_features=[VisualFeatures.CAPTION, VisualFeatures.READ],
                 gender_neutral_caption=True,  # Optional (default is False)
             )

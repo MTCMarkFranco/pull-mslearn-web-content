@@ -1,3 +1,4 @@
+import base64
 import os
 from azure.ai.vision.imageanalysis import ImageAnalysisClient as AzureImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
@@ -5,6 +6,7 @@ from azure.core.credentials import AzureKeyCredential
 from openai import AzureOpenAI, completions
 from typing import List
 import json
+import requests
 
 from pydantic_core import Url
 from models import categories
@@ -100,8 +102,9 @@ class llmToolsService:
 
     def get_image_detailed_decription_from_llm(self, keywords: str = "", imageUrl: Url = None, imagSVGData: str = None) -> str:
         try:    
+            
             query = f"""
-                    analyze the attached (image_url) / embedded (image data in SVG Format:) image and use the following keywords (if present) to help you perform your functions: {keywords}"
+                    Analyze the attached (image_url) or the embedded (image data in SVG Format if present) and use the following keywords (if present) to help you perform your functions: Keywords: {keywords}
                     """
 
             systemprompt = f"""
@@ -112,34 +115,55 @@ class llmToolsService:
                             # As a second step, generate compliant Mermaid script markdown to recreate the diagram. Do not use parentheses to denote comments or 
                             # aliases, as this symbol is dedicated to a Mermaid script character. 
                             # Additionally, avoid using parentheses in labels within the Mermaid script to ensure compliance.
-            
-            # inistialize messages with query
-            messages = [
-                        {
-                            "type": "text",
-                            "text": query
-                        }
                         
-                    ]
-              
-            # add image data if present
-            if imagSVGData:
-                system_prompt += f" image data in SVG Format:{imagSVGData}"
-            else:
-                # add image url if present
-                messages.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"{imageUrl}"
-                }
-            })
+      
+            chat_prompt = [
+                            {
+                                "role": "system",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "{systemprompt}"
+                                    }
+                                ]
+                            },
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "{query}"
+                                    }
+                                                                       
+                                ]
+                            }
+                        ] 
+            
+            # Support popular image formats
+            if (imageUrl):
 
-        
+                encoded_image = base64.b64encode(requests.get(str(imageUrl)).content).decode('ascii')
+                imageData = f"data:image/jpeg;base64,{encoded_image}"
+                chat_prompt[1]["content"].append(
+                                                    {
+                                                        "type": "image_url",
+                                                        "image_url": {
+                                                            "url": imageData
+                                                        }
+                                                    }
+                                                )
+                
+            # Supporting SVG images
+            elif (imagSVGData):
+                
+                chat_prompt[1]["content"][0]["text"] += f" image data in SVG Format: {imagSVGData}"
+                                
+            
             completion = self.azureopenai_client.chat.completions.create( 
                         model=self.completions_model,
-                        max_tokens=800,
+                        max_tokens=1000,
                         temperature=0.7,
-                        messages = messages,
+                        messages = chat_prompt,
                         top_p=0.95,  
                         frequency_penalty=0,  
                         presence_penalty=0,
@@ -170,4 +194,3 @@ class llmToolsService:
         except Exception as e:
             print(f"An error occurred during vectorization: {e}")
             return []
-

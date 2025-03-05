@@ -1,3 +1,4 @@
+from asyncio import sleep
 import os
 from azure.ai.vision.imageanalysis import ImageAnalysisClient as AzureImageAnalysisClient
 from azure.core.credentials import AzureKeyCredential
@@ -117,6 +118,8 @@ class indexService:
                             vector_search=vector_search, 
                             semantic_search=semantic_search)
         result = self.index_client.create_or_update_index(index)
+        # wait for the index to be created
+        sleep(10)  # Wait for the index to be fully created
         print(f"Created index: {result.name}")
 
     def write_to_index(self, webcontent: webContent) -> str:
