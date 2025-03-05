@@ -99,7 +99,7 @@ class llmToolsService:
                                         
             return categories_obj
         except Exception as e:
-            print(f"Couldn't categorize content, assigning default 'Miscellaneous': {e}")
+            print(f"Couldn't categorize content, assigning default: 'Miscellaneous': {e}")
             return ["Miscellaneous"]
 
 
