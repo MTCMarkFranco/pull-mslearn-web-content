@@ -45,7 +45,7 @@ class htmlContentService:
                
         content_type = response.headers['Content-Type']
 
-        if content_type.startswith("image/svg"): # not supported by service as of Jan 2025
+        if content_type.startswith("image/svg"): 
             
             svg_content = response.content.decode("utf-8")
             full_document_text = self.llm_client.get_image_detailed_decription_from_llm(imagSVGData=svg_content)
@@ -53,15 +53,14 @@ class htmlContentService:
             vectorized_content_chunks[url] = self.llm_client.vectorize_chunk(full_document_text)
             currentWebContent.type = 'IMAGE'
             
-
-        elif any(ext in content_type for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff']):
+        elif any(ext in content_type for ext in ['jpeg', 'jpg', 'pdf', 'png', 'bmp', 'tiff','gif', 'webp','mpo']):
             keywords = self.image_client.describe_image(image_url=Url(url))
             full_document_text = self.llm_client.get_image_detailed_decription_from_llm(keywords, imageUrl=Url(url))
             content_chunks[url] = full_document_text # No chunking required here as we are controlling the llm response size window for image description
             vectorized_content_chunks[url] = self.llm_client.vectorize_chunk(full_document_text)
             currentWebContent.type = 'IMAGE'
         
-        else:
+        elif content_type.startswith("text/html"):
             soup = BeautifulSoup(response.content, 'html.parser')
             # Check if the page has a main tag           
             full_document_text = soup.find('main').get_text()
