@@ -43,7 +43,20 @@ class indexService:
                                     )
         
         try:
+            # Check if the index exists
             self.index_client.get_index(self.search_index)
+            
+            # Check if there are records in the index
+            result = self.search_client.search("*", top=1)
+            records_exist = False
+            for _ in result:
+                records_exist = True
+                break
+                
+            if records_exist:
+                print(f"Records found in index {self.search_index}. Deleting all records...")
+                self.delete_all_documents()
+                
         except Exception as e:
             print(f"Index {self.search_index} does not exist. Creating index...")
             self.create_index()
@@ -149,3 +162,59 @@ class indexService:
             print(f"Writing to index for {webcontent.url}")
         except Exception as e:
             print(f"An error occurred: {e}")
+            
+    def delete_all_documents(self):
+        """
+        Delete all documents from the index without deleting the index itself.
+        Uses a wildcard query to find all documents and then issues a delete operation.
+        """
+        try:
+            print(f"Retrieving all document keys from index {self.search_index}...")
+            
+            # Get all document keys from the index
+            results = self.search_client.search("*", select="chunk_id", include_total_count=True)
+            
+            # Check if there are documents to delete
+            total_count = results.get_count()
+            if total_count == 0:
+                print(f"No documents found in index {self.search_index}")
+                return
+                
+            print(f"Found {total_count} documents to delete")
+            
+            # Collect all document keys
+            doc_keys = []
+            for result in results:
+                doc_keys.append({"chunk_id": result["chunk_id"]})
+            
+            # Delete documents in batches
+            batch_size = 1000
+            for i in range(0, len(doc_keys), batch_size):
+                batch = doc_keys[i:i+batch_size]
+                actions = [{"@search.action": "delete", **key} for key in batch]
+                
+                # Upload actions to delete documents
+                result = self.search_client.upload_documents(actions)
+                print(f"Deleted batch of {len(batch)} documents. Succeeded: {result.succeeded_count}, Failed: {result.failed_count}")
+            
+            print(f"Successfully deleted all documents from index {self.search_index}")
+            
+        except Exception as e:
+            print(f"Error deleting all documents: {e}")
+            print("Attempting fallback method...")
+            
+            try:
+                # Fallback approach if the standard delete operation fails
+                print(f"Deleting index {self.search_index}...")
+                self.index_client.delete_index(self.search_index)
+                print(f"Index {self.search_index} deleted successfully.")
+                
+                # Wait a moment for the deletion to complete
+                time.sleep(5)
+                
+                # Recreate the index
+                print(f"Recreating index {self.search_index}...")
+                self.create_index()
+                print(f"All documents successfully removed from index {self.search_index}")
+            except Exception as inner_e:
+                print(f"Error using fallback method: {inner_e}")
